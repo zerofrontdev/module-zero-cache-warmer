@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!--
+    Copyright © 2026 Roman Pasichnyk
+    SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="zero_cache_warmer" translate="label" type="text" sortOrder="97" showInDefault="1">
+            <label>Cache Warmer</label>
+            <tab>zero</tab>
+            <resource>Zero_CacheWarmer::config</resource>
+            <group id="general" translate="label comment" type="text" sortOrder="10" showInDefault="1">
+                <label>Cache Warmer</label>
+                <comment><![CDATA[After a deploy (<code>bin/magento zero:cache:warm --later</code>) or Flush Magento Cache, the cron requests each store view's home page, categories, CMS pages, the paths below and its best-selling products once, one at a time, so the full page cache holds them before the first visitor. With Varnish the requests go to Varnish itself (the <code>http_cache_hosts</code> of env.php). Pages are warmed as a guest sees them.]]></comment>
+                <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" canRestore="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="categories" translate="label comment" type="text" sortOrder="15" showInDefault="1" canRestore="1">
+                    <label>Categories per Store View</label>
+                    <comment>The top levels first. A category page not warmed is cached by its first visitor. 0: no category pages.</comment>
+                    <validate>validate-digits</validate>
+                </field>
+                <field id="products" translate="label comment" type="text" sortOrder="20" showInDefault="1" canRestore="1">
+                    <label>Products per Store View</label>
+                    <comment>The best sellers of the last 90 days, then the newest products. 0: no product pages.</comment>
+                    <validate>validate-digits</validate>
+                </field>
+                <field id="extra_paths" translate="label comment" type="textarea" sortOrder="30" showInDefault="1" canRestore="1">
+                    <label>Also Warm</label>
+                    <comment>Paths under each store view's URL, one a line (brands, blog). A path a store view doesn't have is skipped.</comment>
+                </field>
+                <field id="after_save" translate="label comment" type="select" sortOrder="40" showInDefault="1" canRestore="1">
+                    <label>Warm a Page After It Is Saved</label>
+                    <comment>A saved product (with its categories), category or CMS page is warmed again by the next cron run.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="delay_ms" translate="label comment" type="text" sortOrder="50" showInDefault="1" canRestore="1">
+                    <label>Pause Between Requests (ms)</label>
+                    <validate>validate-digits</validate>
+                </field>
+                <field id="max_load" translate="label comment" type="text" sortOrder="60" showInDefault="1" canRestore="1">
+                    <label>Wait While the Load Is Above</label>
+                    <comment>The server's 1-minute load average; while it is higher the warmer waits, so visitors come first. 0: the number of CPU cores.</comment>
+                    <validate>validate-number</validate>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

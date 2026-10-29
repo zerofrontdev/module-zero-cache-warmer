@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+    Copyright © 2026 Roman Pasichnyk
+    SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+
+    A saved page is purged from the cache; the next cron run warms it again.
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="catalog_product_save_after">
+        <observer name="zero_cache_warmer_queue" instance="Zero\CacheWarmer\Observer\QueueSaved"/>
+    </event>
+    <event name="catalog_category_save_after">
+        <observer name="zero_cache_warmer_queue" instance="Zero\CacheWarmer\Observer\QueueSaved"/>
+    </event>
+    <event name="cms_page_save_after">
+        <observer name="zero_cache_warmer_queue" instance="Zero\CacheWarmer\Observer\QueueSaved"/>
+    </event>
+</config>

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+    Copyright © 2026 Roman Pasichnyk
+    SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+
+    System > Cache Management: Flush Magento Cache and Flush Cache Storage
+    empty the full page cache; the next cron run warms it again.
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="adminhtml_cache_flush_system">
+        <observer name="zero_cache_warmer_full" instance="Zero\CacheWarmer\Observer\QueueFull"/>
+    </event>
+    <event name="adminhtml_cache_flush_all">
+        <observer name="zero_cache_warmer_full" instance="Zero\CacheWarmer\Observer\QueueFull"/>
+    </event>
+</config>

@@ -1,0 +1,50 @@
+{
+    "name": "zerofront/module-zero-cache-warmer",
+    "description": "Zero for Magento Open Source: warms the full page cache after a deploy, a flush or a save: the home page, categories, CMS pages and best sellers of every store view, through Varnish or the built-in cache.",
+    "type": "magento2-module",
+    "version": "1.3.5",
+    "license": [
+        "OSL-3.0",
+        "AFL-3.0"
+    ],
+    "authors": [
+        {
+            "name": "Roman Pasichnyk"
+        }
+    ],
+    "homepage": "https://zerofront.dev",
+    "keywords": [
+        "magento",
+        "magento2",
+        "magento-open-source",
+        "zero",
+        "cache-warmer",
+        "full-page-cache",
+        "varnish",
+        "performance"
+    ],
+    "require": {
+        "php": "~8.2.0||~8.3.0||~8.4.0",
+        "magento/framework": "103.0.*",
+        "magento/module-backend": "*",
+        "magento/module-catalog": "*",
+        "magento/module-cms": "*",
+        "magento/module-config": "*",
+        "magento/module-cron": "*",
+        "magento/module-page-cache": "*",
+        "magento/module-store": "*",
+        "magento/module-url-rewrite": "*",
+        "zerofront/module-zero-core": "^1.3"
+    },
+    "replace": {
+        "fixstacks/module-zero-cache-warmer": "self.version"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Zero\\CacheWarmer\\": ""
+        }
+    }
+}

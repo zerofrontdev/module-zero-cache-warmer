@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+    Copyright © 2026 Roman Pasichnyk
+    SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="default">
+        <!-- Does what was queued (a full warm after a deploy or a flush, saved pages); nothing when the queue is empty. -->
+        <job name="zero_cache_warmer_run" instance="Zero\CacheWarmer\Cron\Run" method="execute">
+            <schedule>* * * * *</schedule>
+        </job>
+    </group>
+</config>
