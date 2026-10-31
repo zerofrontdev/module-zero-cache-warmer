@@ -23,7 +23,8 @@ use Zero\CacheWarmer\Model\Warmer;
  * bin/magento zero:cache:warm [--store=code,…] [--products=N] [--later] [--dry-run]
  *
  * Warms the full page cache now, or with --later leaves it to the next cron
- * run (what a deploy does: the deploy doesn't wait for it).
+ * run (what a deploy does: the deploy doesn't wait for it); --store limits
+ * either to those store views.
  */
 class WarmCommand extends Command
 {
@@ -54,10 +55,11 @@ class WarmCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $stores = array_values(array_filter(array_map('trim', explode(',', (string) $input->getOption('store')))));
         if ($input->getOption('later')) {
-            $this->queue->full();
+            $this->queue->full($stores);
             $output->writeln($this->config->isEnabled()
-                ? '<info>Queued: the next cron run warms every store view.</info>'
+                ? '<info>Queued: the next cron run warms ' . ($stores === [] ? 'every store view' : 'the store views ' . implode(', ', $stores)) . '.</info>'
                 : '<comment>Queued, but the warmer is off (Stores > Configuration > Zero > Cache Warmer).</comment>');
 
             return Command::SUCCESS;
@@ -67,7 +69,6 @@ class WarmCommand extends Command
         } catch (LocalizedException) {
             // Already set.
         }
-        $stores = array_values(array_filter(array_map('trim', explode(',', (string) $input->getOption('store')))));
         $products = $input->getOption('products') !== null ? max(0, (int) $input->getOption('products')) : $this->config->products();
         if ($input->getOption('dry-run')) {
             foreach ($this->warmer->plan($stores, $products) as $url) {

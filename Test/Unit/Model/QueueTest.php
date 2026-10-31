@@ -16,7 +16,7 @@ use Zero\CacheWarmer\Model\Queue;
 
 /**
  * The queue: saved pages each once and at most MAX_IDS per type, "full"
- * kept alongside, taking empties it.
+ * kept alongside (for every store view, or the listed ones), taking empties it.
  */
 #[AllowMockObjectsWithoutExpectations]
 class QueueTest extends TestCase
@@ -49,9 +49,9 @@ class QueueTest extends TestCase
         $queue->add('cms-page', [2]);
         $queue->add('order', [9]);
 
-        $this->assertSame(['full' => false, 'ids' => ['product' => [5, 7], 'cms-page' => [2]]], $queue->take());
+        $this->assertSame(['full' => false, 'stores' => [], 'ids' => ['product' => [5, 7], 'cms-page' => [2]]], $queue->take());
         $this->assertNull($this->flag);
-        $this->assertSame(['full' => false, 'ids' => []], $queue->take());
+        $this->assertSame(['full' => false, 'stores' => [], 'ids' => []], $queue->take());
     }
 
     public function testFullKeepsTheSavedPages(): void
@@ -60,7 +60,27 @@ class QueueTest extends TestCase
         $queue->add('category', [3]);
         $queue->full();
 
-        $this->assertSame(['full' => true, 'ids' => ['category' => [3]]], $queue->take());
+        $this->assertSame(['full' => true, 'stores' => [], 'ids' => ['category' => [3]]], $queue->take());
+    }
+
+    public function testAFullWarmOfSomeStoreViewsKeepsThem(): void
+    {
+        $queue = $this->queue();
+        $queue->full(['edge']);
+        $queue->full(['beam', 'edge', '']);
+
+        $this->assertSame(['full' => true, 'stores' => ['edge', 'beam'], 'ids' => []], $queue->take());
+    }
+
+    public function testEveryStoreViewWinsOverSome(): void
+    {
+        $queue = $this->queue();
+        $queue->full(['edge']);
+        $queue->full();
+        $queue->full(['beam']);
+
+        $this->assertSame(['full' => true, 'stores' => [], 'ids' => []], $queue->take(), 'a deploy\'s full warm is not narrowed');
+        $this->assertTrue(Queue::mergeFull(1, ['beam']), 'a flag written before store lists existed means every store view');
     }
 
     public function testAnImportDoesNotQueueThousands(): void

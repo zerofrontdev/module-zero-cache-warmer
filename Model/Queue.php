@@ -12,7 +12,8 @@ use Magento\Framework\FlagManager;
 use Magento\Framework\Lock\LockManagerInterface;
 
 /**
- * What the next cron run warms: everything (after a deploy or a flush), or the
+ * What the next cron run warms: everything (after a deploy or a flush), the
+ * full warm of some store views (`zero:cache:warm --later --store=…`), or the
  * pages saved since the last run. Kept in Magento's `flag` table; every change
  * runs under a short lock, so a save and the cron taking the queue can't lose
  * each other's entries.
@@ -31,9 +32,29 @@ class Queue
     ) {
     }
 
-    public function full(): void
+    /**
+     * @param string[] $stores store view codes; empty: every store view
+     */
+    public function full(array $stores = []): void
     {
-        $this->change(static fn (array $queue) => ['full' => true] + $queue);
+        $this->change(static fn (array $queue) => ['full' => self::mergeFull($queue['full'] ?? null, $stores)] + $queue);
+    }
+
+    /**
+     * A queued full warm and a new one together: true (every store view) wins, else both lists of store views.
+     *
+     * @param mixed $current what the queue holds: null, true, or store view codes
+     * @param string[] $stores
+     * @return true|string[]
+     */
+    public static function mergeFull(mixed $current, array $stores): bool|array
+    {
+        $stores = array_values(array_filter(array_map('strval', $stores), static fn ($code) => $code !== ''));
+        if ($current === true || $stores === [] || (!is_array($current) && !empty($current))) {
+            return true;
+        }
+
+        return array_values(array_unique([...array_map('strval', (array) $current), ...$stores]));
     }
 
     /**
@@ -48,9 +69,9 @@ class Queue
     }
 
     /**
-     * The queue as it was, emptied.
+     * The queue as it was, emptied. `stores` lists the store views of a full warm; empty: every one.
      *
-     * @return array{full: bool, ids: array<string, int[]>}
+     * @return array{full: bool, stores: string[], ids: array<string, int[]>}
      */
     public function take(): array
     {
@@ -62,6 +83,7 @@ class Queue
 
         return [
             'full' => !empty($taken['full']),
+            'stores' => is_array($taken['full'] ?? null) ? array_values(array_map('strval', $taken['full'])) : [],
             'ids' => array_map(static fn ($ids) => array_map('intval', array_keys((array) $ids)), (array) ($taken['ids'] ?? [])),
         ];
     }
